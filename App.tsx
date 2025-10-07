@@ -135,35 +135,72 @@ const App: React.FC = () => {
 
      // Load from localStorage on mount
     useEffect(() => {
-        const storedName = localStorage.getItem('nihara-username');
-        if (storedName) setUserName(storedName); else setShowOnboarding(true);
+        try {
+            const storedName = localStorage.getItem('nihara-username');
+            if (storedName) setUserName(storedName); else setShowOnboarding(true);
+        } catch (e) {
+            console.error("Failed to load username:", e);
+            setShowOnboarding(true);
+        }
 
-        const storedHistory = localStorage.getItem('nihara-history');
-        const allHistory = storedHistory ? JSON.parse(storedHistory) : [];
-        setHistory(allHistory);
+        let allHistory: ChatHistory[] = [];
+        try {
+            const storedHistory = localStorage.getItem('nihara-history');
+            if (storedHistory) allHistory = JSON.parse(storedHistory);
+            setHistory(allHistory);
+        } catch (e) {
+            console.error("Failed to parse history from localStorage:", e);
+        }
 
-        const storedReminders = localStorage.getItem('nihara-reminders');
-        if (storedReminders) setReminders(JSON.parse(storedReminders));
+        try {
+            const storedReminders = localStorage.getItem('nihara-reminders');
+            if (storedReminders) setReminders(JSON.parse(storedReminders));
+        } catch (e) {
+            console.error("Failed to parse reminders from localStorage:", e);
+        }
 
-        const storedBond = localStorage.getItem('nihara-bond');
-        if (storedBond) setBondLevel(JSON.parse(storedBond));
+        try {
+            const storedBond = localStorage.getItem('nihara-bond');
+            if (storedBond) setBondLevel(JSON.parse(storedBond));
+        } catch (e) {
+            console.error("Failed to parse bond level from localStorage:", e);
+        }
 
-        const storedMemories = localStorage.getItem('nihara-memories');
-        if (storedMemories) setMemories(JSON.parse(storedMemories));
-
-        const storedDiaryEntries = localStorage.getItem('nihara-diary-entries');
-        if (storedDiaryEntries) setDiaryEntries(JSON.parse(storedDiaryEntries));
-
-        const storedPin = localStorage.getItem('nihara-diary-pin');
-        if (storedPin) setDiaryPin(storedPin);
+        try {
+            const storedMemories = localStorage.getItem('nihara-memories');
+            if (storedMemories) setMemories(JSON.parse(storedMemories));
+        } catch (e) {
+            console.error("Failed to parse memories from localStorage:", e);
+        }
         
-        const lastChatId = localStorage.getItem('nihara-lastChatId');
-        if (lastChatId && allHistory.length > 0) {
-            const chatToLoad = allHistory.find((h: ChatHistory) => h.id === lastChatId);
-            if (chatToLoad) {
-                setTimeout(() => handleLoadChat(lastChatId, allHistory), 0);
+        try {
+            const storedDiaryEntries = localStorage.getItem('nihara-diary-entries');
+            if (storedDiaryEntries) setDiaryEntries(JSON.parse(storedDiaryEntries));
+        } catch (e) {
+            console.error("Failed to parse diary entries from localStorage:", e);
+        }
+        
+        try {
+            const storedPin = localStorage.getItem('nihara-diary-pin');
+            if (storedPin) setDiaryPin(storedPin);
+        } catch (e) {
+            console.error("Failed to load diary pin:", e);
+        }
+        
+        try {
+            const lastChatId = localStorage.getItem('nihara-lastChatId');
+            if (lastChatId && allHistory.length > 0) {
+                const chatToLoad = allHistory.find((h: ChatHistory) => h.id === lastChatId);
+                if (chatToLoad) {
+                    setTimeout(() => handleLoadChat(lastChatId, allHistory), 0);
+                } else {
+                    setCurrentChatId(Date.now().toString());
+                }
+            } else {
+                setCurrentChatId(Date.now().toString());
             }
-        } else {
+        } catch (e) {
+            console.error("Failed to load last chat:", e);
             setCurrentChatId(Date.now().toString());
         }
     }, []);
@@ -558,6 +595,7 @@ const App: React.FC = () => {
         }
         switch(currentMode) {
             case AppMode.AIDiary:
+// FIX: Use correct state variables `isDiaryLocked` and `setIsDiaryLocked`.
                 return <DiaryView entries={diaryEntries} onAddEntry={handleAddDiaryEntry} onSetPin={handleSetDiaryPin} onUnlock={handleUnlockDiary} isLocked={isDiaryLocked} setIsLocked={setIsDiaryLocked} pinIsSet={!!diaryPin} />;
             case AppMode.ImageGen:
                 return <ImageGenView onGenerate={handleGenerateImage} isLoading={isLoading} images={generatedImages} />;

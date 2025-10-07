@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Nihara: AI Companion",
+  "description": "An intelligent and attractive AI companion with multiple personalities, live voice chat, image generation, and learning capabilities. Created by Abhinav Gireesh.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
